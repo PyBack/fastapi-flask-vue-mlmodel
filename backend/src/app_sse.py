@@ -1,4 +1,15 @@
+import os
+import site
+import traceback
+
+from logging.config import dictConfig
+
 from flask import Flask, Response
+from flask import Blueprint
+from flask import current_app
+from flask_cors import CORS
+from flask_restx import Api, Resource
+
 from messageannouncer import MessageAnnouncer
 
 # Flask 환경 변수
@@ -6,9 +17,37 @@ FLASK_ENV = 'development'
 FLASK_RUN_PORT = 5500
 FLASK_DEBUG = True
 
+# Flask-RESTX를 사용하기 위한 설정
 app = Flask(__name__)
+# blueprint = Blueprint('api_2', __name__, url_prefix='/api/v2')
+# api = Api(blueprint, version='0.2',
+#           title='Flask API',
+#           description='Flask API Structure Test',
+#           )
+#
+# app.register_blueprint(blueprint)
 
 announcer = MessageAnnouncer()
+
+# enable CORS
+CORS(app, resources={r'/*': {'origins': '*'}})
+
+# Flask root logger config
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '%(asctime)s [%(levelname)s] {%(filename)s %(lineno)d} {%(funcName)s}: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://sys.stdout',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
 
 
 def format_sse(data: str, event=None) -> str:
@@ -28,13 +67,14 @@ def format_sse(data: str, event=None) -> str:
 @app.route('/')
 def health_check():
     msg = 'Flask API Good!!'
-    print(msg)
+    app.logger.info(msg)
     return msg
 
 
 @app.route('/ping')
 def ping():
     msg = format_sse(data='pong', event='optimizer state')
+    app.logger.info('\n' + msg)
     announcer.announce(msg=msg)
     return {}, 200
 
