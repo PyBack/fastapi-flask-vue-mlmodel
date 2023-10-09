@@ -51,6 +51,7 @@ class MLModelEPSPredictResult(Resource):
         json_data = request.json.get('data')
 
         # ToDo: MySQL 에 데이터 적재
+        # announcer 에 append 되는 메시지는 바로 FrontEnd 에 전달됨
 
         msg = format_sse(data=json_data, event='ml_model/eps')
         print(msg)
