@@ -27,6 +27,7 @@ class MLModelEPS(Resource):
         args = self.parser.parse_args()
         ticker = args['ticker']
 
+        print("ticker: " + ticker)
         current_app.logger.info("ticker: " + ticker)
 
         # step.1: validation check
