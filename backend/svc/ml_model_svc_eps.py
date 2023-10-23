@@ -1,18 +1,19 @@
 import requests
 
-from flask import current_app
+from flask import current_app, request
 from flask_restx import Resource, Namespace
-from flask_restx import reqparse
+from flask_restx import fields
 
 
 ml_model_ns_v2 = Namespace('ml_model', 'ML model service v2')
 
+resource_fields = ml_model_ns_v2.model(name='ml model predict input (user)',
+                                       model={'ticker': fields.String(required=True, title='ticker')}
+                                       )
+
 
 class MLModelEPS(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('ticker', type=str, help='Ticker')
-
-    @ml_model_ns_v2.expect(parser)
+    # @ml_model_ns_v2.expect(resource_fields)
     @ml_model_ns_v2.doc(responses={
         200: 'Success (Accept)',
         400: 'Bad Request: 입력값 유효성 실패',
@@ -20,12 +21,12 @@ class MLModelEPS(Resource):
         429: 'Too Many Requests',
         500: 'Internal Server Error:  REST-API 서버 자체 애러, /////',
     })
-    def get(self):
+    def post(self):
         """
         EPS 예측 모델 실행
         """
-        args = self.parser.parse_args()
-        ticker = args['ticker']
+        json_data = request.get_json(force=True)
+        ticker = json_data['ticker']
 
         current_app.logger.info("ticker: " + ticker)
 

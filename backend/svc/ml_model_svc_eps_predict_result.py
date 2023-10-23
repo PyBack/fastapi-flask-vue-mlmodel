@@ -21,18 +21,31 @@ def format_sse(data: str, event=None) -> str:
     return msg
 
 
-model = ml_model_ns_v2.model('new article',
-                             strict=True,
-                             model={'writer': fields.String(title='글 작성자', default='writer', required=True),
-                                    'password': fields.String(title='비밀번호', default='password', required=True),
-                                    'category': fields.String(title='글 카테고리', default='잡담', required=True),
-                                    'title': fields.String(title='글 제목', default='title', required=True),
-                                    'description': fields.String(title='글 본문', default='description', required=True),
-                                    }
-                             )
+# model = ml_model_ns_predict_v2.model('new article',
+#                                      strict=True,
+#                                      model={'writer': fields.String(title='글 작성자', default='writer', required=True),
+#                                     'password': fields.String(title='비밀번호', default='password', required=True),
+#                                     'category': fields.String(title='글 카테고리', default='잡담', required=True),
+#                                     'title': fields.String(title='글 제목', default='title', required=True),
+#                                     'description': fields.String(title='글 본문', default='description', required=True),
+#                                     }
+#                                      )
+class DictItem(fields.Raw):
+    def output(self, key, obj, *args, **kwargs):
+        try:
+            dct = getattr(obj, self.attribute)
+        except AttributeError:
+            return {}
+        return dct or {}
 
 
-class MLModelEPSPredictResult(Resource):
+resource_fields = ml_model_ns_v2.model(name='ml model predict input',
+                                       model={'ticker': fields.String(required=True, title='ticker'),
+                                              'data': fields.String(required=True, title='data')}
+                                       )
+
+
+class MLModelEPSPredictRequest(Resource):
     announcer = MessageAnnouncer()
 
     @ml_model_ns_v2.doc(responses={
@@ -42,7 +55,7 @@ class MLModelEPSPredictResult(Resource):
         429: 'Too Many Requests',
         500: 'Internal Server Error:  REST-API 서버 자체 애러, /////',
     })
-    # @ml_model_ns_v2.expect(model, validate=True)
+    # @ml_model_ns_v2.expect(resource_fields, validate=True)
     def post(self):
         """
         EPS 예측 모델 결과 등록 (ML model Pod 대응)
@@ -70,7 +83,7 @@ class MLModelEPSPredictResult(Resource):
     })
     def get(self):
         """
-        EPS 예측 모델 결과 Notification (FrontEnd 대응)
+        EPS 예측 모델 결과 Notification Listen (FrontEnd 대응)
         """
         def stream():
             messages = self.announcer.listen()  # returns a queue.Queue

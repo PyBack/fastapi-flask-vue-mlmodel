@@ -6,7 +6,7 @@ from flask_restx import Api, Namespace
 # from flask_request_validator.error_formatter import demo_error_formatter
 
 from svc.ml_model_svc_eps import MLModelEPS
-from svc.ml_model_svc_eps_predict_result import MLModelEPSPredictResult
+from svc.ml_model_svc_eps_predict_result import MLModelEPSPredictRequest
 from svc.ml_model_svc_sample import MLModelSample
 
 
@@ -36,7 +36,6 @@ def default_error_handler(error):
 
 def create_ml_model_namespace():
     api.add_namespace(ml_model_ns_v2)
-
-    ml_model_ns_v2.add_resource(MLModelEPS, '/eps-predict-request')
-    ml_model_ns_v2.add_resource(MLModelEPSPredictResult, '/eps-predict-result')
     ml_model_ns_v2.add_resource(MLModelSample, '/sample')
+    ml_model_ns_v2.add_resource(MLModelEPS, '/eps-predict')
+    ml_model_ns_v2.add_resource(MLModelEPSPredictRequest, '/eps-predict-request')

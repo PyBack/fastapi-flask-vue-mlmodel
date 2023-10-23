@@ -5,7 +5,7 @@ from flask_restx import reqparse
 ml_model_ns_v2 = Namespace('ml_model', 'ML model service v2')
 
 
-# @ml_model_ns_v2.route('/sample')
+# @ml_model_ns_predict_v2.route('/sample')
 class MLModelSample(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('ticker', type=str, help='Ticker')
