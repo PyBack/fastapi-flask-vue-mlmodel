@@ -47,15 +47,17 @@ class MLModelEPSPredictResult(Resource):
         """
         EPS 예측 모델 결과 등록 (ML model Pod 대응)
         """
+        if not request.is_json:
+            current_app.logger.info('body is not json')
+            return {}, 400
 
-        json_data = request.json.get('data')
+        json_data = request.get_json(force=True)
+        current_app.logger.info("json_data \n" + str(json_data))
 
-        # ToDo: MySQL 에 데이터 적재
         # announcer 에 append 되는 메시지는 바로 FrontEnd 에 전달됨
 
-        msg = format_sse(data=json_data, event='ml_model/eps')
-        print(msg)
-        current_app.logger.info('\n' + msg)
+        msg = format_sse(data=json_data['data'], event='ml_model/eps')
+        current_app.logger.info('format sse\n' + msg)
         self.announcer.announce(msg=msg)
         return {}, 200
 

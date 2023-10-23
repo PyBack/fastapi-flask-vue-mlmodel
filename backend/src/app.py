@@ -4,11 +4,9 @@ import traceback
 
 from logging.config import dictConfig
 
-from flask import Flask, Response
-from flask import Blueprint
-from flask import current_app
+from flask import Flask
 from flask_cors import CORS
-from flask_restx import Api, Resource
+from flask_restx import Api
 
 src_path = os.path.dirname(__file__)
 pjt_home_path = os.path.join(src_path, os.pardir)
@@ -21,15 +19,6 @@ from views import controller as ctrl
 FLASK_ENV = 'development'
 FLASK_RUN_PORT = 5500
 FLASK_DEBUG = True
-
-# Flask-RESTX를 사용하기 위한 설정
-app = Flask(__name__)
-
-app.register_blueprint(ctrl.blueprint)
-ctrl.create_ml_model_namespace()
-
-# enable CORS
-CORS(app, resources={r'/*': {'origins': '*'}})
 
 # Flask root logger config
 dictConfig({
@@ -47,6 +36,16 @@ dictConfig({
         'handlers': ['wsgi']
     }
 })
+
+# Flask-RESTX를 사용하기 위한 설정
+app = Flask(__name__)
+api = Api(app)
+
+ctrl.create_ml_model_namespace()
+app.register_blueprint(ctrl.blueprint)
+
+# enable CORS
+CORS(app, resources={r'/*': {'origins': '*'}})
 
 
 @app.route('/')
